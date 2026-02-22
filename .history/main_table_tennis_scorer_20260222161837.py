@@ -163,128 +163,95 @@ class TableTennisScorer:
             recognize_thread.start()
 
     def _recognize_and_score(self, audio):
-        """识别音频并处理得分，使用 show_all 获取所有候选结果"""
-        scored = None
-        matched_text = ""
+        """识别音频并处理得分，尝试中英文双语识别"""
+        results = []
 
-        # ── 中文识别（show_all获取所有候选） ──
+        # 尝试1：Google中文识别（喊"A"在中文语境下常被识别为"a""诶""哎"等）
         try:
-            raw_zh = self.recognizer.recognize_google(audio, language="zh-CN", show_all=True)
-            if raw_zh and isinstance(raw_zh, dict):
-                alternatives = raw_zh.get('alternative', [])
-                for alt in alternatives:
-                    t = alt.get('transcript', '').strip()
-                    if t:
-                        print(f"[Voice] zh candidate: '{t}' (conf: {alt.get('confidence', '?')})")
-                        s = self._match_voice_command(t)
-                        if s:
-                            scored = s
-                            matched_text = t
-                            break
-            elif raw_zh and isinstance(raw_zh, str):
-                print(f"[Voice] Google(zh) heard: '{raw_zh}'")
-                scored = self._match_voice_command(raw_zh)
-                if scored:
-                    matched_text = raw_zh
-            else:
-                print("[Voice] Google(zh): no result")
+            text_zh = self.recognizer.recognize_google(audio, language="zh-CN")
+            text_zh = text_zh.strip()
+            results.append(('zh', text_zh))
+            print(f"[Voice] Google(zh) heard: '{text_zh}'")
+        except sr.UnknownValueError:
+            print("[Voice] Google(zh): couldn't understand")
         except sr.RequestError as e:
             print(f"[Voice] Google(zh) request error: {e}")
         except Exception as e:
             print(f"[Voice] Google(zh) error: {e}")
 
-        # ── 如果中文没匹配到，尝试英文 ──
-        if not scored:
-            try:
-                raw_en = self.recognizer.recognize_google(audio, language="en-US", show_all=True)
-                if raw_en and isinstance(raw_en, dict):
-                    alternatives = raw_en.get('alternative', [])
-                    for alt in alternatives:
-                        t = alt.get('transcript', '').strip()
-                        if t:
-                            print(f"[Voice] en candidate: '{t}' (conf: {alt.get('confidence', '?')})")
-                            s = self._match_voice_command(t)
-                            if s:
-                                scored = s
-                                matched_text = t
-                                break
-                elif raw_en and isinstance(raw_en, str):
-                    print(f"[Voice] Google(en) heard: '{raw_en}'")
-                    scored = self._match_voice_command(raw_en)
-                    if scored:
-                        matched_text = raw_en
-                else:
-                    print("[Voice] Google(en): no result")
-            except sr.RequestError as e:
-                print(f"[Voice] Google(en) request error: {e}")
-            except Exception as e:
-                print(f"[Voice] Google(en) error: {e}")
+        # 尝试2：Google英文识别
+        try:
+            text_en = self.recognizer.recognize_google(audio, language="en-US")
+            text_en = text_en.strip()
+            results.append(('en', text_en))
+            print(f"[Voice] Google(en) heard: '{text_en}'")
+        except sr.UnknownValueError:
+            print("[Voice] Google(en): couldn't understand")
+        except sr.RequestError as e:
+            print(f"[Voice] Google(en) request error: {e}")
+        except Exception as e:
+            print(f"[Voice] Google(en) error: {e}")
+
+        if not results:
+            print("[Voice] No recognition result")
+            return
+
+        # 合并所有识别结果进行匹配
+        scored = None
+        matched_text = ""
+        for lang, text in results:
+            scored = self._match_voice_command(text)
+            if scored:
+                matched_text = text
+                break
 
         if scored:
             print(f">>> Voice command: Player {scored} scores! (heard: '{matched_text}')")
             self.process_score('voice', scored)
         else:
-            print("[Voice] No match found")
+            all_texts = ', '.join([f"{lang}:'{t}'" for lang, t in results])
+            print(f"[Voice] No match in: {all_texts}")
 
     def _match_voice_command(self, text):
         """从识别文本中匹配得分指令，返回 'A'/'B' 或 None"""
-        t = text.strip()
-        tu = t.upper()
+        t = text.strip().upper()
 
-        # ── A 的各种可能识别结果 ──
-        # 英文：A, a, Ay, Hey, Eh, Ace 等
-        # 中文：诶, 哎, 唉, 啊, 嗯A, A分, 加A, A得分 等
-        A_EXACT = {
-            'A', 'a', 'AY', 'HEY', 'EI', 'AE', 'ACE', 'AH', 'HA', 'EH', 'YAY', 'YEAH', 'YA',
-            'PLAYER A', 'SCORE A', 'POINT A', 'ADD A',
+        # A 的各种可能识别结果（英文 + 中文谐音）
+        A_WORDS = {
+            'A', 'AY', 'HEY', 'EI', 'AE', 'ACE', 'AH', 'HA',
+            'PLAYER A', 'SCORE A', 'POINT A',
+            '诶', '哎', '唉', 'A', 'Ａ',  # 中文识别结果
+            'A得分', '诶得分',
         }
-        A_CN = {'诶', '哎', '唉', '啊', '嗯', '呃', '额', '欸',
-                'a', 'A', '加a', '加A', 'a分', 'A分', 'a得分', 'A得分',
-                '加诶', '加哎', '诶得分', '哎得分'}
-
-        # ── B 的各种可能识别结果 ──
-        B_EXACT = {
-            'B', 'b', 'BE', 'BEE', 'BI', 'V', 'VE', 'BEA', 'P', 'PEE', 'VEE',
-            'PLAYER B', 'SCORE B', 'POINT B', 'ADD B',
+        # B 的各种可能识别结果
+        B_WORDS = {
+            'B', 'BE', 'BEE', 'BI', 'V', 'VE', 'BEA', 'P',
+            'PLAYER B', 'SCORE B', 'POINT B',
+            '币', '比', '必', '逼', 'B', 'Ｂ',  # 中文识别结果
+            'B得分', '比得分',
         }
-        B_CN = {'币', '比', '必', '逼', '毕', '笔', '碧', '壁', '闭',
-                'b', 'B', '加b', '加B', 'b分', 'B分', 'b得分', 'B得分',
-                '加比', '加币', '比得分', '币得分'}
 
-        # 精确匹配（原文）
-        if t in A_CN:
+        # 直接全文匹配
+        if t in A_WORDS or t in {w.upper() for w in A_WORDS}:
             return 'A'
-        if t in B_CN:
-            return 'B'
-        # 精确匹配（大写）
-        if tu in A_EXACT:
-            return 'A'
-        if tu in B_EXACT:
+        if t in B_WORDS or t in {w.upper() for w in B_WORDS}:
             return 'B'
 
-        # 逐词匹配
-        words = tu.replace(',', ' ').replace('，', ' ').replace('。', ' ').split()
-        if len(words) <= 5:
+        # 逐词匹配（短句）
+        # 拆分中英文混合文本
+        words = t.replace(',', ' ').replace('，', ' ').split()
+        if len(words) <= 4:
             for w in words:
-                if w in A_EXACT or w in {x.upper() for x in A_CN}:
+                if w in {'A', 'AY', 'EI', 'ACE', 'AH', 'HEY', '诶', '哎', '唉'}:
                     return 'A'
-                if w in B_EXACT or w in {x.upper() for x in B_CN}:
+                if w in {'B', 'BE', 'BEE', 'BI', 'V', 'P', '币', '比', '必'}:
                     return 'B'
 
-        # 逐字符匹配中文关键字
-        for ch in t:
-            if ch in {'诶', '哎', '唉', '嗯', '呃', '欸'}:
+        # 包含判断（兜底）
+        if len(t) <= 6:
+            if 'A' in t and 'B' not in t:
                 return 'A'
-            if ch in {'币', '比', '必', '逼', '毕', '笔', '碧', '壁', '闭'}:
-                return 'B'
-
-        # 兜底：短文本包含A或B
-        if len(tu) <= 8:
-            has_a = 'A' in tu
-            has_b = 'B' in tu
-            if has_a and not has_b:
-                return 'A'
-            if has_b and not has_a:
+            if 'B' in t and 'A' not in t:
                 return 'B'
 
         return None

@@ -109,20 +109,13 @@ class TableTennisScorer:
             try:
                 self.recognizer = sr.Recognizer()
                 self.recognizer.energy_threshold = VOICE_ENERGY_THRESHOLD
-                self.recognizer.dynamic_energy_threshold = False  # 固定阈值，防止自动调高
-                self.recognizer.pause_threshold = 0.3   # 更短的停顿即视为说完
-                self.recognizer.phrase_threshold = 0.1   # 更敏感
-                self.recognizer.non_speaking_duration = 0.2
+                self.recognizer.dynamic_energy_threshold = True
+                self.recognizer.pause_threshold = 0.5
                 self.microphone = sr.Microphone()
                 # 环境噪声校准
                 with self.microphone as source:
                     print("Calibrating microphone for ambient noise (1s)...")
                     self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                print(f"Mic energy threshold after calibration: {self.recognizer.energy_threshold}")
-                # 确保阈值不会被校准得太高
-                if self.recognizer.energy_threshold > 2000:
-                    self.recognizer.energy_threshold = 2000
-                    print(f"Energy threshold capped to 2000")
                 print(f"Voice recognition ready. Say 'A' or 'B' to score!")
             except Exception as e:
                 self.voice_recognition_available = False
@@ -143,18 +136,16 @@ class TableTennisScorer:
 
     def _voice_listen_loop(self):
         """持续监听麦克风，识别到 A/B 立即加分"""
-        print("[Voice] Listen loop started")
         while not self.sr_stop_event.is_set():
             try:
                 with self.microphone as source:
-                    audio = self.recognizer.listen(source, timeout=3, phrase_time_limit=VOICE_PHRASE_TIME_LIMIT)
-                print("[Voice] Audio captured, recognizing...")
+                    # 短时间监听，便于响应停止信号
+                    audio = self.recognizer.listen(source, timeout=2, phrase_time_limit=VOICE_PHRASE_TIME_LIMIT)
             except sr.WaitTimeoutError:
-                # 超时没听到声音，正常继续
                 continue
             except Exception as e:
-                print(f"[Voice] Listen error: {e}")
-                time.sleep(0.5)
+                if DEBUG_MODE:
+                    print(f"Voice listen error: {e}")
                 continue
 
             # 异步识别，避免阻塞监听循环
@@ -163,131 +154,47 @@ class TableTennisScorer:
             recognize_thread.start()
 
     def _recognize_and_score(self, audio):
-        """识别音频并处理得分，使用 show_all 获取所有候选结果"""
-        scored = None
-        matched_text = ""
-
-        # ── 中文识别（show_all获取所有候选） ──
+        """识别音频并处理得分"""
+        text = ""
         try:
-            raw_zh = self.recognizer.recognize_google(audio, language="zh-CN", show_all=True)
-            if raw_zh and isinstance(raw_zh, dict):
-                alternatives = raw_zh.get('alternative', [])
-                for alt in alternatives:
-                    t = alt.get('transcript', '').strip()
-                    if t:
-                        print(f"[Voice] zh candidate: '{t}' (conf: {alt.get('confidence', '?')})")
-                        s = self._match_voice_command(t)
-                        if s:
-                            scored = s
-                            matched_text = t
-                            break
-            elif raw_zh and isinstance(raw_zh, str):
-                print(f"[Voice] Google(zh) heard: '{raw_zh}'")
-                scored = self._match_voice_command(raw_zh)
-                if scored:
-                    matched_text = raw_zh
-            else:
-                print("[Voice] Google(zh): no result")
-        except sr.RequestError as e:
-            print(f"[Voice] Google(zh) request error: {e}")
-        except Exception as e:
-            print(f"[Voice] Google(zh) error: {e}")
-
-        # ── 如果中文没匹配到，尝试英文 ──
-        if not scored:
+            # 优先用Google免费API识别英文（A/B最准）
+            text = self.recognizer.recognize_google(audio, language="en-US")
+        except sr.UnknownValueError:
+            return  # 没听清，忽略
+        except sr.RequestError:
+            # 网络不可用时尝试离线识别
             try:
-                raw_en = self.recognizer.recognize_google(audio, language="en-US", show_all=True)
-                if raw_en and isinstance(raw_en, dict):
-                    alternatives = raw_en.get('alternative', [])
-                    for alt in alternatives:
-                        t = alt.get('transcript', '').strip()
-                        if t:
-                            print(f"[Voice] en candidate: '{t}' (conf: {alt.get('confidence', '?')})")
-                            s = self._match_voice_command(t)
-                            if s:
-                                scored = s
-                                matched_text = t
-                                break
-                elif raw_en and isinstance(raw_en, str):
-                    print(f"[Voice] Google(en) heard: '{raw_en}'")
-                    scored = self._match_voice_command(raw_en)
-                    if scored:
-                        matched_text = raw_en
-                else:
-                    print("[Voice] Google(en): no result")
-            except sr.RequestError as e:
-                print(f"[Voice] Google(en) request error: {e}")
-            except Exception as e:
-                print(f"[Voice] Google(en) error: {e}")
+                text = self.recognizer.recognize_sphinx(audio)
+            except Exception:
+                return
+        except Exception:
+            return
+
+        text = text.strip().upper()
+        if DEBUG_MODE:
+            print(f"Voice heard: '{text}'")
+
+        # 匹配关键词
+        scored = None
+        if text in ('A', 'AY', 'HEY', 'EI', 'AE', 'ACE'):
+            scored = 'A'
+        elif text in ('B', 'BE', 'BEE', 'BI', 'V'):
+            scored = 'B'
+        else:
+            # 检查文本是否包含 A 或 B（针对短语识别）
+            words = text.split()
+            if len(words) <= 3:  # 只处理短语，避免长句误判
+                for w in words:
+                    if w in ('A', 'AY', 'EI', 'ACE'):
+                        scored = 'A'
+                        break
+                    elif w in ('B', 'BE', 'BEE', 'BI'):
+                        scored = 'B'
+                        break
 
         if scored:
-            print(f">>> Voice command: Player {scored} scores! (heard: '{matched_text}')")
+            print(f"Voice command: Player {scored} scores! (heard: '{text}')")
             self.process_score('voice', scored)
-        else:
-            print("[Voice] No match found")
-
-    def _match_voice_command(self, text):
-        """从识别文本中匹配得分指令，返回 'A'/'B' 或 None"""
-        t = text.strip()
-        tu = t.upper()
-
-        # ── A 的各种可能识别结果 ──
-        # 英文：A, a, Ay, Hey, Eh, Ace 等
-        # 中文：诶, 哎, 唉, 啊, 嗯A, A分, 加A, A得分 等
-        A_EXACT = {
-            'A', 'a', 'AY', 'HEY', 'EI', 'AE', 'ACE', 'AH', 'HA', 'EH', 'YAY', 'YEAH', 'YA',
-            'PLAYER A', 'SCORE A', 'POINT A', 'ADD A',
-        }
-        A_CN = {'诶', '哎', '唉', '啊', '嗯', '呃', '额', '欸',
-                'a', 'A', '加a', '加A', 'a分', 'A分', 'a得分', 'A得分',
-                '加诶', '加哎', '诶得分', '哎得分'}
-
-        # ── B 的各种可能识别结果 ──
-        B_EXACT = {
-            'B', 'b', 'BE', 'BEE', 'BI', 'V', 'VE', 'BEA', 'P', 'PEE', 'VEE',
-            'PLAYER B', 'SCORE B', 'POINT B', 'ADD B',
-        }
-        B_CN = {'币', '比', '必', '逼', '毕', '笔', '碧', '壁', '闭',
-                'b', 'B', '加b', '加B', 'b分', 'B分', 'b得分', 'B得分',
-                '加比', '加币', '比得分', '币得分'}
-
-        # 精确匹配（原文）
-        if t in A_CN:
-            return 'A'
-        if t in B_CN:
-            return 'B'
-        # 精确匹配（大写）
-        if tu in A_EXACT:
-            return 'A'
-        if tu in B_EXACT:
-            return 'B'
-
-        # 逐词匹配
-        words = tu.replace(',', ' ').replace('，', ' ').replace('。', ' ').split()
-        if len(words) <= 5:
-            for w in words:
-                if w in A_EXACT or w in {x.upper() for x in A_CN}:
-                    return 'A'
-                if w in B_EXACT or w in {x.upper() for x in B_CN}:
-                    return 'B'
-
-        # 逐字符匹配中文关键字
-        for ch in t:
-            if ch in {'诶', '哎', '唉', '嗯', '呃', '欸'}:
-                return 'A'
-            if ch in {'币', '比', '必', '逼', '毕', '笔', '碧', '壁', '闭'}:
-                return 'B'
-
-        # 兜底：短文本包含A或B
-        if len(tu) <= 8:
-            has_a = 'A' in tu
-            has_b = 'B' in tu
-            if has_a and not has_b:
-                return 'A'
-            if has_b and not has_a:
-                return 'B'
-
-        return None
 
     def stop_listening(self):
         """停止语音识别"""
