@@ -1,0 +1,308 @@
+2026-02-22 11:46:38,824 - INFO - �÷֣�ѡ��A�÷֣���Դ��pose����ǰ�ȷ� A:1 - B:0
+2026-02-22 12:11:00,732 - INFO - 得分！选手A得分，来源：pose，当前比分 A:1 - B:0
+2026-02-22 12:11:07,880 - INFO - 得分！选手A得分，来源：pose，当前比分 A:2 - B:0
+2026-02-22 12:11:31,439 - INFO - 得分！选手A得分，来源：pose，当前比分 A:2 - B:1
+2026-02-22 14:18:25,407 - INFO - 得分！选手A得分，来源：pose，当前比分 A:1 - B:0
+2026-02-22 14:18:28,858 - INFO - 得分！选手B得分，来源：pose，当前比分 A:2 - B:0
+2026-02-22 14:18:31,917 - INFO - 得分！选手B得分，来源：pose，当前比分 A:2 - B:1
+2026-02-22 14:21:48,073 - ERROR - Speech recognition service error: recognition connection failed: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+2026-02-22 14:21:51,504 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:0
+2026-02-22 14:21:56,637 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:0
+2026-02-22 14:22:04,901 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:1
+2026-02-22 14:22:07,910 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 14:22:13,316 - ERROR - Speech recognition service error: recognition connection failed: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+2026-02-22 14:29:45,488 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:0
+2026-02-22 14:29:50,783 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:0
+2026-02-22 14:29:53,830 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:1
+2026-02-22 14:29:56,869 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 14:30:00,011 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:2
+2026-02-22 14:30:03,041 - INFO - Score! Player B scored, Source: pose, Current Score A:4 - B:2
+2026-02-22 14:30:26,172 - INFO - Score! Player B scored, Source: pose, Current Score A:4 - B:3
+2026-02-22 14:30:32,632 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:4
+2026-02-22 14:30:38,228 - INFO - Score! Player A scored, Source: pose, Current Score A:5 - B:4
+2026-02-22 14:30:55,497 - INFO - Score! Player B scored, Source: pose, Current Score A:6 - B:4
+2026-02-22 14:30:58,538 - INFO - Score! Player B scored, Source: pose, Current Score A:6 - B:5
+2026-02-22 14:31:05,273 - INFO - Score! Player A scored, Source: pose, Current Score A:6 - B:6
+2026-02-22 14:31:09,254 - INFO - Score! Player A scored, Source: pose, Current Score A:7 - B:6
+2026-02-22 14:31:13,457 - INFO - Score! Player B scored, Source: pose, Current Score A:8 - B:6
+2026-02-22 14:33:43,785 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 14:33:52,900 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 14:33:56,932 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 14:34:01,092 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 14:34:09,891 - INFO - Score! Player A scored, Source: voice, Current Score A:3 - B:2
+2026-02-22 14:34:19,168 - INFO - Score! Player A scored, Source: voice, Current Score A:4 - B:2
+2026-02-22 14:39:27,290 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 14:39:32,737 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 14:39:37,569 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 14:39:57,944 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 14:40:10,557 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 14:40:15,138 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:4
+2026-02-22 14:40:19,085 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:4
+2026-02-22 14:40:24,929 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:4
+2026-02-22 14:48:10,246 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 14:48:26,769 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 14:48:29,773 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:3
+2026-02-22 14:48:34,055 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:4
+2026-02-22 14:48:39,311 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:5
+2026-02-22 14:48:44,095 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:6
+2026-02-22 14:48:47,569 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:7
+2026-02-22 14:48:51,966 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:8
+2026-02-22 14:48:54,976 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:9
+2026-02-22 14:48:59,950 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:10
+2026-02-22 14:49:02,988 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:11
+2026-02-22 14:49:02,988 - INFO - Game Over! Player B wins! Set Score A:0 - B:11, Total Games A:0 - B:1
+2026-02-22 14:54:37,094 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:0
+2026-02-22 14:54:40,171 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:0
+2026-02-22 14:54:43,183 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:0
+2026-02-22 14:54:47,328 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:0
+2026-02-22 14:55:35,842 - INFO - Score! Player A scored, Source: pose, Current Score A:5 - B:0
+2026-02-22 14:55:58,421 - INFO - Score! Player A scored, Source: pose, Current Score A:6 - B:0
+2026-02-22 14:56:01,440 - INFO - Score! Player A scored, Source: pose, Current Score A:7 - B:0
+2026-02-22 14:56:05,189 - INFO - Score! Player A scored, Source: pose, Current Score A:8 - B:0
+2026-02-22 14:56:08,249 - INFO - Score! Player A scored, Source: pose, Current Score A:9 - B:0
+2026-02-22 14:56:11,284 - INFO - Score! Player A scored, Source: pose, Current Score A:10 - B:0
+2026-02-22 14:56:14,321 - INFO - Score! Player A scored, Source: pose, Current Score A:11 - B:0
+2026-02-22 14:56:14,321 - INFO - Game Over! Player A wins! Set Score A:0 - B:0, Total Games A:1 - B:0
+2026-02-22 14:56:19,011 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:0
+2026-02-22 14:56:22,025 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:0
+2026-02-22 14:56:25,028 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:0
+2026-02-22 14:56:28,074 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:0
+2026-02-22 14:56:31,094 - INFO - Score! Player A scored, Source: pose, Current Score A:5 - B:0
+2026-02-22 14:56:34,207 - INFO - Score! Player A scored, Source: pose, Current Score A:6 - B:0
+2026-02-22 14:56:37,227 - INFO - Score! Player A scored, Source: pose, Current Score A:7 - B:0
+2026-02-22 14:56:40,259 - INFO - Score! Player A scored, Source: pose, Current Score A:8 - B:0
+2026-02-22 14:56:43,373 - INFO - Score! Player A scored, Source: pose, Current Score A:9 - B:0
+2026-02-22 14:56:46,718 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:1
+2026-02-22 14:56:49,854 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:2
+2026-02-22 14:56:52,859 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:3
+2026-02-22 14:56:59,562 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:4
+2026-02-22 14:57:02,566 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:5
+2026-02-22 14:57:05,591 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:6
+2026-02-22 14:57:08,837 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:7
+2026-02-22 14:57:12,010 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:8
+2026-02-22 14:57:15,030 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:9
+2026-02-22 14:57:18,059 - INFO - Score! Player B scored, Source: pose, Current Score A:9 - B:10
+2026-02-22 14:57:21,169 - INFO - Score! Player A scored, Source: pose, Current Score A:10 - B:10
+2026-02-22 14:57:24,235 - INFO - Score! Player B scored, Source: pose, Current Score A:10 - B:11
+2026-02-22 14:57:27,274 - INFO - Score! Player A scored, Source: pose, Current Score A:11 - B:11
+2026-02-22 14:57:30,322 - INFO - Score! Player B scored, Source: pose, Current Score A:11 - B:12
+2026-02-22 14:57:33,343 - INFO - Score! Player B scored, Source: pose, Current Score A:11 - B:13
+2026-02-22 14:57:33,343 - INFO - Game Over! Player B wins! Set Score A:0 - B:0, Total Games A:1 - B:1
+2026-02-22 15:00:23,619 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:0
+2026-02-22 15:00:28,910 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:0
+2026-02-22 15:01:01,129 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:1
+2026-02-22 15:01:18,105 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:02:10,323 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 15:02:15,988 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:4
+2026-02-22 15:02:19,016 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:4
+2026-02-22 15:02:22,156 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:4
+2026-02-22 15:03:50,045 - INFO - Score! Player B scored, Source: voice, Current Score A:0 - B:1
+2026-02-22 15:03:56,946 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 15:03:59,990 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:3
+2026-02-22 15:04:03,002 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:4
+2026-02-22 15:04:10,936 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:5
+2026-02-22 15:04:14,663 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:5
+2026-02-22 15:04:22,263 - INFO - Score! Player B scored, Source: voice, Current Score A:1 - B:6
+2026-02-22 15:05:18,077 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:7
+2026-02-22 15:06:09,669 - INFO - Score! Player A scored, Source: voice, Current Score A:2 - B:7
+2026-02-22 15:06:33,779 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:7
+2026-02-22 15:06:37,542 - INFO - Score! Player A scored, Source: voice, Current Score A:4 - B:7
+2026-02-22 15:06:47,532 - INFO - Score! Player A scored, Source: pose, Current Score A:5 - B:7
+2026-02-22 15:06:52,920 - INFO - Score! Player A scored, Source: pose, Current Score A:6 - B:7
+2026-02-22 15:07:00,288 - INFO - Score! Player A scored, Source: voice, Current Score A:7 - B:7
+2026-02-22 15:14:31,413 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:14:39,596 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:14:45,262 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:14:48,945 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:3
+2026-02-22 15:14:51,963 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 15:16:47,674 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:16:54,157 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:17:02,829 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:17:07,485 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:19:49,923 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:19:51,177 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 15:19:54,764 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:3
+2026-02-22 15:19:57,776 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:3
+2026-02-22 15:20:02,208 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 15:22:52,522 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:22:55,075 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:23:06,407 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:28:00,420 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:28:02,298 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:28:20,129 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:1
+2026-02-22 15:28:23,210 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:28:32,926 - INFO - Current game reset, totals kept
+2026-02-22 15:32:21,566 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:32:23,558 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:32:30,398 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:1
+2026-02-22 15:34:23,387 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:34:23,683 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 15:34:27,256 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:34:34,410 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:36:33,701 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:36:43,788 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:36:47,678 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:46:11,102 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:46:14,576 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 15:46:18,453 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:46:22,410 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:46:25,437 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:2
+2026-02-22 15:47:41,460 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 15:47:41,460 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 15:47:50,490 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:47:55,929 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:47:59,792 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:48:04,020 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:49:58,526 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:49:58,572 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 15:49:58,572 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 15:50:04,437 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:50:10,394 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:53:46,359 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:53:46,410 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 15:53:46,410 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 15:53:55,427 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:54:01,581 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:54:20,863 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:54:32,089 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 15:56:55,591 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:56:55,630 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 15:56:55,630 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 15:57:04,014 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:57:08,101 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:57:13,712 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:57:16,717 - INFO - Score! Player A scored, Source: pose, Current Score A:3 - B:2
+2026-02-22 15:57:20,592 - INFO - Score! Player A scored, Source: pose, Current Score A:4 - B:2
+2026-02-22 15:58:00,769 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 15:58:00,802 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 15:58:00,802 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 15:58:08,725 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:1
+2026-02-22 15:58:13,446 - INFO - Score! Player B scored, Source: pose, Current Score A:1 - B:2
+2026-02-22 15:58:20,802 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:2
+2026-02-22 15:58:25,668 - INFO - Score! Player B scored, Source: pose, Current Score A:2 - B:3
+2026-02-22 16:02:45,856 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:1
+2026-02-22 16:02:45,889 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 16:02:45,890 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 16:03:11,964 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:2
+2026-02-22 16:03:15,349 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:3
+2026-02-22 16:03:18,678 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:4
+2026-02-22 16:03:43,053 - INFO - Score! Player B scored, Source: pose, Current Score A:0 - B:5
+2026-02-22 16:03:46,067 - INFO - Score! Player A scored, Source: pose, Current Score A:1 - B:5
+2026-02-22 16:03:59,448 - INFO - Score! Player A scored, Source: pose, Current Score A:2 - B:5
+2026-02-22 16:04:14,433 - INFO - Manual adjust: Player A -1, Score A:1 - B:5
+2026-02-22 16:04:17,696 - INFO - Manual adjust: Player B -1, Score A:1 - B:4
+2026-02-22 16:04:25,136 - INFO - Manual adjust: Player A +1, Score A:2 - B:4
+2026-02-22 16:04:26,944 - INFO - Manual adjust: Player A -1, Score A:1 - B:4
+2026-02-22 16:04:27,866 - INFO - Manual adjust: Player A +1, Score A:2 - B:4
+2026-02-22 16:04:28,814 - INFO - Manual adjust: Player A -1, Score A:1 - B:4
+2026-02-22 16:04:29,447 - INFO - Manual adjust: Player A +1, Score A:2 - B:4
+2026-02-22 16:04:30,186 - INFO - Manual adjust: Player A +1, Score A:3 - B:4
+2026-02-22 16:04:30,622 - INFO - Manual adjust: Player A +1, Score A:4 - B:4
+2026-02-22 16:04:31,059 - INFO - Manual adjust: Player A +1, Score A:5 - B:4
+2026-02-22 16:04:31,376 - INFO - Manual adjust: Player A +1, Score A:6 - B:4
+2026-02-22 16:04:31,614 - INFO - Manual adjust: Player A +1, Score A:7 - B:4
+2026-02-22 16:04:31,837 - INFO - Manual adjust: Player A +1, Score A:8 - B:4
+2026-02-22 16:04:32,671 - INFO - Manual adjust: Player B -1, Score A:8 - B:3
+2026-02-22 16:04:33,501 - INFO - Manual adjust: Player B -1, Score A:8 - B:2
+2026-02-22 16:06:02,955 - INFO - Manual adjust: Player A +1, Score A:1 - B:0
+2026-02-22 16:06:02,999 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 16:06:03,000 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 16:06:06,684 - INFO - Manual adjust: Player A -1, Score A:0 - B:0
+2026-02-22 16:06:07,831 - INFO - Manual adjust: Player A +1, Score A:1 - B:0
+2026-02-22 16:06:08,203 - INFO - Manual adjust: Player A +1, Score A:2 - B:0
+2026-02-22 16:06:08,606 - INFO - Manual adjust: Player A +1, Score A:3 - B:0
+2026-02-22 16:06:09,355 - INFO - Manual adjust: Player A -1, Score A:2 - B:0
+2026-02-22 16:06:10,101 - INFO - Manual adjust: Player B +1, Score A:2 - B:1
+2026-02-22 16:06:10,515 - INFO - Manual adjust: Player B +1, Score A:2 - B:2
+2026-02-22 16:06:11,196 - INFO - Manual adjust: Player B +1, Score A:2 - B:3
+2026-02-22 16:06:11,758 - INFO - Manual adjust: Player B +1, Score A:2 - B:4
+2026-02-22 16:06:12,325 - INFO - Manual adjust: Player B +1, Score A:2 - B:5
+2026-02-22 16:06:12,563 - INFO - Manual adjust: Player B +1, Score A:2 - B:6
+2026-02-22 16:06:13,268 - INFO - Manual adjust: Player A +1, Score A:3 - B:6
+2026-02-22 16:06:13,453 - INFO - Manual adjust: Player A +1, Score A:4 - B:6
+2026-02-22 16:06:13,713 - INFO - Manual adjust: Player A +1, Score A:5 - B:6
+2026-02-22 16:07:01,036 - INFO - Manual adjust: Player A -1, Score A:0 - B:0
+2026-02-22 16:07:01,067 - INFO - Imported existing <module 'comtypes.gen' from 'D:\\python\\lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-02-22 16:07:01,067 - INFO - Using writeable comtypes cache directory: 'D:\python\lib\site-packages\comtypes\gen'
+2026-02-22 16:07:01,552 - INFO - Manual adjust: Player A +1, Score A:1 - B:0
+2026-02-22 16:07:03,888 - INFO - Manual adjust: Player A +1, Score A:2 - B:0
+2026-02-22 16:07:06,202 - INFO - Manual adjust: Player A -1, Score A:1 - B:0
+2026-02-22 16:07:07,319 - INFO - Manual adjust: Player A +1, Score A:2 - B:0
+2026-02-22 16:07:08,982 - INFO - Manual adjust: Player A -1, Score A:1 - B:0
+2026-02-22 16:07:10,083 - INFO - Manual adjust: Player A +1, Score A:2 - B:0
+2026-02-22 16:07:11,887 - INFO - Manual adjust: Player B +1, Score A:2 - B:1
+2026-02-22 16:07:12,651 - INFO - Manual adjust: Player B +1, Score A:2 - B:2
+2026-02-22 16:07:13,310 - INFO - Manual adjust: Player B -1, Score A:2 - B:1
+2026-02-22 16:07:13,865 - INFO - Manual adjust: Player B -1, Score A:2 - B:0
+2026-02-22 16:07:14,020 - INFO - Manual adjust: Player B +1, Score A:2 - B:1
+2026-02-22 16:07:14,286 - INFO - Manual adjust: Player B +1, Score A:2 - B:2
+2026-02-22 16:07:14,505 - INFO - Manual adjust: Player B +1, Score A:2 - B:3
+2026-02-22 16:07:14,648 - INFO - Manual adjust: Player B +1, Score A:2 - B:4
+2026-02-22 16:07:14,845 - INFO - Manual adjust: Player B +1, Score A:2 - B:5
+2026-02-22 16:07:15,003 - INFO - Manual adjust: Player B +1, Score A:2 - B:6
+2026-02-22 16:07:15,188 - INFO - Manual adjust: Player B -1, Score A:2 - B:5
+2026-02-22 16:07:15,433 - INFO - Manual adjust: Player B -1, Score A:2 - B:4
+2026-02-22 16:07:15,581 - INFO - Manual adjust: Player B -1, Score A:2 - B:3
+2026-02-22 16:07:15,749 - INFO - Manual adjust: Player B -1, Score A:2 - B:2
+2026-02-22 16:07:16,074 - INFO - Manual adjust: Player A +1, Score A:3 - B:2
+2026-02-22 16:07:16,442 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:16,687 - INFO - Manual adjust: Player A -1, Score A:3 - B:2
+2026-02-22 16:07:16,856 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:17,003 - INFO - Manual adjust: Player A -1, Score A:3 - B:2
+2026-02-22 16:07:17,164 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:17,411 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:17,752 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:18,097 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:18,284 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:18,394 - INFO - Manual adjust: Player A -1, Score A:3 - B:2
+2026-02-22 16:07:18,573 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:18,717 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:18,859 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:19,006 - INFO - Manual adjust: Player A -1, Score A:3 - B:2
+2026-02-22 16:07:19,156 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:19,295 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:19,360 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:19,476 - INFO - Manual adjust: Player A -1, Score A:3 - B:2
+2026-02-22 16:07:19,621 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:19,742 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:19,851 - INFO - Manual adjust: Player A -1, Score A:3 - B:3
+2026-02-22 16:07:19,917 - INFO - Manual adjust: Player B -1, Score A:3 - B:2
+2026-02-22 16:07:20,035 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:20,201 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:20,311 - INFO - Manual adjust: Player A -1, Score A:3 - B:3
+2026-02-22 16:07:20,397 - INFO - Manual adjust: Player B -1, Score A:3 - B:2
+2026-02-22 16:07:20,501 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:20,612 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:20,695 - INFO - Manual adjust: Player A -1, Score A:3 - B:3
+2026-02-22 16:07:20,845 - INFO - Manual adjust: Player B -1, Score A:3 - B:2
+2026-02-22 16:07:20,968 - INFO - Manual adjust: Player A +1, Score A:4 - B:2
+2026-02-22 16:07:21,111 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:21,213 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:21,276 - INFO - Manual adjust: Player A +1, Score A:5 - B:2
+2026-02-22 16:07:21,363 - INFO - Manual adjust: Player B +1, Score A:5 - B:3
+2026-02-22 16:07:21,448 - INFO - Manual adjust: Player A -1, Score A:4 - B:3
+2026-02-22 16:07:21,599 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:21,720 - INFO - Manual adjust: Player A +1, Score A:5 - B:2
+2026-02-22 16:07:21,833 - INFO - Manual adjust: Player B +1, Score A:5 - B:3
+2026-02-22 16:07:22,027 - INFO - Manual adjust: Player B -1, Score A:5 - B:2
+2026-02-22 16:07:22,144 - INFO - Manual adjust: Player A -1, Score A:4 - B:2
+2026-02-22 16:07:22,235 - INFO - Manual adjust: Player B -1, Score A:4 - B:1
+2026-02-22 16:07:22,307 - INFO - Manual adjust: Player B +1, Score A:4 - B:2
+2026-02-22 16:07:22,437 - INFO - Manual adjust: Player A +1, Score A:5 - B:2
+2026-02-22 16:07:22,552 - INFO - Manual adjust: Player A -1, Score A:4 - B:2
+2026-02-22 16:07:22,665 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:22,810 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:22,881 - INFO - Manual adjust: Player A +1, Score A:5 - B:2
+2026-02-22 16:07:22,985 - INFO - Manual adjust: Player A -1, Score A:4 - B:2
+2026-02-22 16:07:23,052 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:23,196 - INFO - Manual adjust: Player B -1, Score A:4 - B:2
+2026-02-22 16:07:23,261 - INFO - Manual adjust: Player A +1, Score A:5 - B:2
+2026-02-22 16:07:23,390 - INFO - Manual adjust: Player A -1, Score A:4 - B:2
+2026-02-22 16:07:23,449 - INFO - Manual adjust: Player B +1, Score A:4 - B:3
+2026-02-22 16:07:23,546 - INFO - Manual adjust: Player A +1, Score A:5 - B:3
+2026-02-22 16:07:23,608 - INFO - Manual adjust: Player B -1, Score A:5 - B:2
+2026-02-22 16:07:23,767 - INFO - Manual adjust: Player B +1, Score A:5 - B:3
+2026-02-22 16:07:23,824 - INFO - Manual adjust: Player A +1, Score A:6 - B:3
+2026-02-22 16:07:23,913 - INFO - Manual adjust: Player B -1, Score A:6 - B:2
+2026-02-22 16:07:24,034 - INFO - Manual adjust: Player A -1, Score A:5 - B:2
+2026-02-22 16:07:24,188 - INFO - Manual adjust: Player B -1, Score A:5 - B:1
