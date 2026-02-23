@@ -15,9 +15,9 @@ MAX_NUM_HANDS = 2
 
 # 语音识别设置
 VOICE_KEYWORDS = ["得分", "score", "好球", "great", "goal", "goat"]
-VOICE_ENERGY_THRESHOLD = 200     # 音量阈值（降低以便识别短促喊声）
-VOICE_PHRASE_TIME_LIMIT = 0.5    # 最长录音时间（秒，喊A/B很短，缩短加速响应）
-VOICE_LISTEN_TIMEOUT = 1.5      # 监听超时（秒，无声音则跳过）
+VOICE_ENERGY_THRESHOLD = 00     # 音量阈值（降低以便识别短促喊声）
+VOICE_PHRASE_TIME_LIMIT = 0.8    # 最长录音时间（秒，喊A/B很短，缩短加速响应）
+VOICE_LISTEN_TIMEOUT = 1.5       # 监听超时（秒，无声音则跳过）
 
 # 游戏规则设置
 COOLDOWN_PERIOD = 3            # 得分后冷却时间（秒）

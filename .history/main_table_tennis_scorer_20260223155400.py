@@ -38,6 +38,7 @@ except ImportError:
 
 from config import *
 
+
 class PlayerGestureState:
     def __init__(self):
         self.is_holding_high = False
@@ -111,18 +112,14 @@ class TableTennisScorer:
         self.voice_recognition_available = SR_AVAILABLE
         self.sr_stop_event = threading.Event()
         self.sr_thread = None
-        # 语音识别状态追踪（用于UI进度条）
-        self.voice_state = 'idle'  # 'idle' / 'listening' / 'processing' / 'scored'
-        self.voice_state_time = 0   # 状态开始时间
-        self.voice_scored_player = None  # 最近识别到的得分方
         if self.voice_recognition_available:
             try:
                 self.recognizer = sr.Recognizer()
                 self.recognizer.energy_threshold = VOICE_ENERGY_THRESHOLD
                 self.recognizer.dynamic_energy_threshold = False  # 固定阈值，防止自动调高
-                self.recognizer.pause_threshold = 0.15  # 极短停顿即视为说完（加速）
-                self.recognizer.phrase_threshold = 0.05  # 更敏感（加速）
-                self.recognizer.non_speaking_duration = 0.1  # 缩短非语音段（加速）
+                self.recognizer.pause_threshold = 0.3   # 更短的停顿即视为说完
+                self.recognizer.phrase_threshold = 0.1   # 更敏感
+                self.recognizer.non_speaking_duration = 0.2
                 self.microphone = sr.Microphone()
                 # 环境噪声校准
                 with self.microphone as source:
@@ -159,25 +156,16 @@ class TableTennisScorer:
         """持续监听麦克风，识别到 A/B 立即加分"""
         print("[Voice] Listen loop started")
         while not self.sr_stop_event.is_set():
-            self.voice_state = 'listening'
-            self.voice_state_time = time.time()
             try:
                 with self.microphone as source:
-                    audio = self.recognizer.listen(
-                        source,
-                        timeout=VOICE_LISTEN_TIMEOUT,
-                        phrase_time_limit=VOICE_PHRASE_TIME_LIMIT
-                    )
-                self.voice_state = 'processing'
-                self.voice_state_time = time.time()
+                    audio = self.recognizer.listen(source, timeout=3, phrase_time_limit=VOICE_PHRASE_TIME_LIMIT)
                 print("[Voice] Audio captured, recognizing...")
             except sr.WaitTimeoutError:
-                self.voice_state = 'idle'
+                # 超时没听到声音，正常继续
                 continue
             except Exception as e:
                 print(f"[Voice] Listen error: {e}")
-                self.voice_state = 'idle'
-                time.sleep(0.3)
+                time.sleep(0.5)
                 continue
 
             # 异步识别，避免阻塞监听循环
@@ -186,65 +174,68 @@ class TableTennisScorer:
             recognize_thread.start()
 
     def _recognize_and_score(self, audio):
-        """识别音频并处理得分 —— 中英文并行请求，谁先匹配谁生效"""
-        result_lock = threading.Lock()
-        result = {'scored': None, 'matched_text': ''}
-        done_event = threading.Event()
+        """识别音频并处理得分，使用 show_all 获取所有候选结果"""
+        scored = None
+        matched_text = ""
 
-        def _try_recognize(language, label):
-            """单语言识别子任务"""
+        # ── 中文识别（show_all获取所有候选） ──
+        try:
+            raw_zh = self.recognizer.recognize_google(audio, language="zh-CN", show_all=True)
+            if raw_zh and isinstance(raw_zh, dict):
+                alternatives = raw_zh.get('alternative', [])
+                for alt in alternatives:
+                    t = alt.get('transcript', '').strip()
+                    if t:
+                        print(f"[Voice] zh candidate: '{t}' (conf: {alt.get('confidence', '?')})")
+                        s = self._match_voice_command(t)
+                        if s:
+                            scored = s
+                            matched_text = t
+                            break
+            elif raw_zh and isinstance(raw_zh, str):
+                print(f"[Voice] Google(zh) heard: '{raw_zh}'")
+                scored = self._match_voice_command(raw_zh)
+                if scored:
+                    matched_text = raw_zh
+            else:
+                print("[Voice] Google(zh): no result")
+        except sr.RequestError as e:
+            print(f"[Voice] Google(zh) request error: {e}")
+        except Exception as e:
+            print(f"[Voice] Google(zh) error: {e}")
+
+        # ── 如果中文没匹配到，尝试英文 ──
+        if not scored:
             try:
-                raw = self.recognizer.recognize_google(audio, language=language, show_all=True)
-                if raw and isinstance(raw, dict):
-                    for alt in raw.get('alternative', []):
+                raw_en = self.recognizer.recognize_google(audio, language="en-US", show_all=True)
+                if raw_en and isinstance(raw_en, dict):
+                    alternatives = raw_en.get('alternative', [])
+                    for alt in alternatives:
                         t = alt.get('transcript', '').strip()
                         if t:
-                            print(f"[Voice] {label} candidate: '{t}' (conf: {alt.get('confidence', '?')})")
+                            print(f"[Voice] en candidate: '{t}' (conf: {alt.get('confidence', '?')})")
                             s = self._match_voice_command(t)
                             if s:
-                                with result_lock:
-                                    if result['scored'] is None:
-                                        result['scored'] = s
-                                        result['matched_text'] = t
-                                        done_event.set()
-                                return
-                elif raw and isinstance(raw, str):
-                    print(f"[Voice] {label} heard: '{raw}'")
-                    s = self._match_voice_command(raw)
-                    if s:
-                        with result_lock:
-                            if result['scored'] is None:
-                                result['scored'] = s
-                                result['matched_text'] = raw
-                                done_event.set()
-                        return
+                                scored = s
+                                matched_text = t
+                                break
+                elif raw_en and isinstance(raw_en, str):
+                    print(f"[Voice] Google(en) heard: '{raw_en}'")
+                    scored = self._match_voice_command(raw_en)
+                    if scored:
+                        matched_text = raw_en
                 else:
-                    print(f"[Voice] {label}: no result")
+                    print("[Voice] Google(en): no result")
             except sr.RequestError as e:
-                print(f"[Voice] {label} request error: {e}")
+                print(f"[Voice] Google(en) request error: {e}")
             except Exception as e:
-                print(f"[Voice] {label} error: {e}")
+                print(f"[Voice] Google(en) error: {e}")
 
-        # ── 中英文并行识别 ──
-        th_zh = threading.Thread(target=_try_recognize, args=("zh-CN", "zh"), daemon=True)
-        th_en = threading.Thread(target=_try_recognize, args=("en-US", "en"), daemon=True)
-        th_zh.start()
-        th_en.start()
-
-        # 等待任一线程匹配成功，或全部完成（最多等3秒防卡死）
-        done_event.wait(timeout=3.0)
-        th_zh.join(timeout=0.5)
-        th_en.join(timeout=0.5)
-
-        if result['scored']:
-            print(f">>> Voice command: Player {result['scored']} scores! (heard: '{result['matched_text']}')")
-            self.voice_state = 'scored'
-            self.voice_scored_player = result['scored']
-            self.voice_state_time = time.time()
-            self.process_score('voice', result['scored'])
+        if scored:
+            print(f">>> Voice command: Player {scored} scores! (heard: '{matched_text}')")
+            self.process_score('voice', scored)
         else:
             print("[Voice] No match found")
-            self.voice_state = 'idle'
 
     def _match_voice_command(self, text):
         """从识别文本中匹配得分指令，返回 'A'/'B' 或 None"""
@@ -316,14 +307,15 @@ class TableTennisScorer:
             self.sr_thread.join(timeout=3)
     
     def speak_score(self, player, current_score_a, current_score_b):
-        """播报得分（中文简短版）"""
+        """播报得分"""
         if not self.tts_available:
             print("Text-to-speech not available")
             return
-        # 中文播报：比分和发球方
-        serve_text = f"{self.serve_side}方发球。"
-        text = f"{current_score_a}比{current_score_b}，{serve_text}"
-        print(f"TTS: {text}")
+
+        # 创建播报文本，加入发球方信息
+        serve_text = f" {self.serve_side}  serve."
+        text = f"Player {player} scores. Current score: A {current_score_a}, B {current_score_b}. {serve_text}"
+        print(f"TTS: {text}")  # 添加调试信息
         self._speak_async(text)
 
     def _speak_async(self, text):
@@ -390,7 +382,78 @@ class TableTennisScorer:
         if self.tts_thread and self.tts_thread.is_alive():
             self.tts_thread.join(timeout=1.0)
 
+    # 移除备用音频播放方法
     
+    def detect_touching_table_pose(self, landmarks):
+        """
+        检测"摸球桌"动作，严格区分接球姿势，防止误判。
+        
+        摸球桌特征：
+          1. 手掌朝下，指尖位于手腕下方（画面中 y 值更大）
+          2. 多根手指伸展（不是握拳/抓球）
+          3. 手整体位于画面下半部分（靠近桌面）
+        
+        接球特征（排除）：
+          - 手指弯曲握拢
+          - 手掌朝上或侧面
+          - 手在画面中上部分
+        """
+        # 获取所有需要的关键点
+        wrist = landmarks[self.mp_hands.HandLandmark.WRIST]
+        index_mcp = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_MCP]
+        middle_mcp = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+        ring_mcp = landmarks[self.mp_hands.HandLandmark.RING_FINGER_MCP]
+        
+        index_tip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
+        index_pip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_PIP]
+        middle_tip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+        middle_pip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+        ring_tip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_TIP]
+        ring_pip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_PIP]
+        pinky_tip = landmarks[self.mp_hands.HandLandmark.PINKY_TIP]
+        pinky_pip = landmarks[self.mp_hands.HandLandmark.PINKY_PIP]
+        
+        # ── 条件1：手掌朝下 ──
+        # 摸桌时手掌朝下，MCP关节群（掌指关节）的y应大于等于手腕y（画面坐标，y越大越靠下）
+        # 即手指方向是从手腕往下延伸
+        palm_center_y = (index_mcp.y + middle_mcp.y + ring_mcp.y) / 3.0
+        palm_facing_down = palm_center_y > wrist.y  # 掌心在手腕下方
+        
+        # ── 条件2：手指伸展（不是握拳/抓球）──
+        # 判断每根手指是否伸展：指尖到MCP的距离 > PIP到MCP的距离
+        # 简化判断：指尖的y应 >= PIP的y（手指向下伸展时指尖更靠下）
+        # 或者指尖到手腕距离 > PIP到手腕距离（手指没有弯曲回来）
+        def finger_extended(tip, pip, mcp):
+            """判断手指是否伸展（未握拳）"""
+            tip_to_mcp = np.sqrt((tip.x - mcp.x)**2 + (tip.y - mcp.y)**2)
+            pip_to_mcp = np.sqrt((pip.x - mcp.x)**2 + (pip.y - mcp.y)**2)
+            return tip_to_mcp > pip_to_mcp * 0.85  # 指尖比PIP更远离掌根
+        
+        extended_count = 0
+        if finger_extended(index_tip, index_pip, index_mcp):
+            extended_count += 1
+        if finger_extended(middle_tip, middle_pip, middle_mcp):
+            extended_count += 1
+        if finger_extended(ring_tip, ring_pip, ring_mcp):
+            extended_count += 1
+        if finger_extended(pinky_tip, pinky_pip, landmarks[self.mp_hands.HandLandmark.PINKY_MCP]):
+            extended_count += 1
+        
+        fingers_open = extended_count >= 3  # 至少3根手指伸展 → 不是握拳/抓球
+        
+        # ── 条件3：手位于画面下半部分（靠近桌面）──
+        hand_y_positions = [lm.y for lm in landmarks]
+        hand_center_y = sum(hand_y_positions) / len(hand_y_positions)
+        hand_near_table = hand_center_y > 0.45  # 手在画面偏下方
+        
+        # ── 条件4：指尖在手腕下方（手确实在向下触摸）──
+        fingertips_below_wrist = (index_tip.y > wrist.y and middle_tip.y > wrist.y)
+        
+        # ── 综合判断 ──
+        is_touching = (palm_facing_down and fingers_open and 
+                       hand_near_table and fingertips_below_wrist)
+        
+        return is_touching
     
     def detect_pose(self, image):
         """检测举手悬停手势，返回(side, is_high)"""
@@ -441,77 +504,83 @@ class TableTennisScorer:
         self.score_source = source
         self.last_score_time = current_time
         
-        # ======== 发球方切换逻辑 ========
+        # 更新发球方（每SERVE_CHANGE_INTERVAL分换发）
         total_score = self.score_a + self.score_b
-        # 10平前，每SERVE_CHANGE_INTERVAL分换发；10平后，每1分换发
-        if self.score_a >= 10 and self.score_b >= 10:
-            serve_interval = 1
-        else:
-            serve_interval = SERVE_CHANGE_INTERVAL
-        if total_score % serve_interval == 0:
+        if total_score % SERVE_CHANGE_INTERVAL == 0:
             self.serve_side = 'B' if self.serve_side == 'A' else 'A'
-        # ======== 胜负判定逻辑 ========
+        
+        # 确定得分选手
         scoring_player = 'A' if target_side == 'A' or (target_side is None and self.serve_side == 'A') else 'B'
+        
+        # 记录得分方，用于界面闪烁动画
         self.last_scoring_player = scoring_player
         self.last_score_change_time = current_time
+        
         log_msg = f"Score! Player {scoring_player} scored, Source: {source}, Current Score A:{self.score_a} - B:{self.score_b}"
-        print(log_msg)
+        print(log_msg)  # 确保正确显示
+        
+        # 播报得分
+        #self.speak_score(scoring_player, self.score_a, self.score_b)
+        
         if LOG_TO_FILE:
             logging.info(log_msg)
-        # ── 播报当前比分 ──
-        self.speak_score(scoring_player, self.score_a, self.score_b)
-        # ── 胜负判定 ──
-        self._check_game_over()
+        
+        # 检查是否达到胜利条件（WINNING_SCORE分且领先MINIMUM_WINNING_DIFFERENCE分）
+        score_diff = abs(self.score_a - self.score_b)
+        winning_score_reached = self.score_a >= WINNING_SCORE or self.score_b >= WINNING_SCORE
+        winning_diff_reached = score_diff >= MINIMUM_WINNING_DIFFERENCE
+        
+        if winning_score_reached and winning_diff_reached:
+            winner = 'A' if self.score_a > self.score_b else 'B'
+            
+            # 更新总局比分
+            if winner == 'A':
+                self.total_games_a += 1
+            else:
+                self.total_games_b += 1
+                
+            # 检查总局比分是否达到4局胜利
+            match_winner = None
+            if self.total_games_a >= 4:
+                match_winner = 'A'
+                self.game_active = False  # 整场比赛结束
+                print(f"Match Over! Player {match_winner} wins the match! Final Score: A:{self.total_games_a} - B:{self.total_games_b}")
+                if LOG_TO_FILE:
+                    logging.info(f"Match Over! Player {match_winner} wins the match! Final Score: A:{self.total_games_a} - B:{self.total_games_b}")
+            elif self.total_games_b >= 4:
+                match_winner = 'B'
+                self.game_active = False  # 整场比赛结束
+                print(f"Match Over! Player {match_winner} wins the match! Final Score: A:{self.total_games_a} - B:{self.total_games_b}")
+                if LOG_TO_FILE:
+                    logging.info(f"Match Over! Player {match_winner} wins the match! Final Score: A:{self.total_games_a} - B:{self.total_games_b}")
+            else:
+                # 仅当前局结束，重置当前局比分，继续比赛
+                print(f"Game Over! Player {winner} wins this game! Set Score A:{self.score_a} - B:{self.score_b}, Total Games A:{self.total_games_a} - B:{self.total_games_b}")
+                self.score_a = 0  # 重置当前局比分
+                self.score_b = 0  # 重置当前局比分
+                self.serve_side = 'A'  # 重新开始时A发球
+                # 注意：这里不改变game_active状态，继续比赛
+                
+                # 播报新游戏开始
+                if self.tts_available:
+                    self._speak_async("New game, starting from zero")
+                
+            log_msg = f"Game Over! Player {winner} wins! Set Score A:{self.score_a} - B:{self.score_b}, Total Games A:{self.total_games_a} - B:{self.total_games_b}"
+            print(log_msg)  # 确保正确显示
+            
+            # 播报比赛结束
+            if self.tts_available:
+                final_text = f"Game over! Player {winner} wins this game! Match score: A {self.total_games_a}, B {self.total_games_b}"
+                if match_winner:
+                    final_text = f"Match over! Player {match_winner} wins the match! Final score: A {self.total_games_a}, B {self.total_games_b}"
+
+                self._speak_async(final_text)
+            
+            if LOG_TO_FILE:
+                logging.info(log_msg)
+        
         return True
     
-    def _check_game_over(self):
-        """统一胜负判定：10平后领先2分即获胜，未到10平则达到WINNING_SCORE且领先2分获胜"""
-        score_diff = abs(self.score_a - self.score_b)
-        max_score = max(self.score_a, self.score_b)
-
-        # 10平（双方均>=10）：领先2分即获胜
-        # 未到10平：达到WINNING_SCORE且领先MINIMUM_WINNING_DIFFERENCE分获胜
-        if max_score >= 10:
-            game_won = score_diff >= 2
-        else:
-            game_won = max_score >= WINNING_SCORE and score_diff >= MINIMUM_WINNING_DIFFERENCE
-
-        if not game_won:
-            return
-
-        winner = 'A' if self.score_a > self.score_b else 'B'
-        if winner == 'A':
-            self.total_games_a += 1
-        else:
-            self.total_games_b += 1
-
-        log_msg = f"Game Over! Player {winner} wins! Score A:{self.score_a} - B:{self.score_b}, Total Games A:{self.total_games_a} - B:{self.total_games_b}"
-        print(log_msg)
-        if LOG_TO_FILE:
-            logging.info(log_msg)
-
-        match_winner = None
-        if self.total_games_a >= 4:
-            match_winner = 'A'
-            self.game_active = False
-        elif self.total_games_b >= 4:
-            match_winner = 'B'
-            self.game_active = False
-
-        if match_winner:
-            print(f"Match Over! Player {match_winner} wins! Final Games A:{self.total_games_a} - B:{self.total_games_b}")
-            if LOG_TO_FILE:
-                logging.info(f"Match Over! Player {match_winner} wins! Final Games A:{self.total_games_a} - B:{self.total_games_b}")
-            if self.tts_available:
-                self._speak_async(f"{match_winner}方赢得整场比赛，最终比分A{self.total_games_a}比B{self.total_games_b}")
-        else:
-            # 本局结束，重置比分继续
-            self.score_a = 0
-            self.score_b = 0
-            self.serve_side = 'A'
-            if self.tts_available:
-                self._speak_async(f"{winner}方获得本局胜利，新局开始，比分清零")
-
     def _draw_translucent_rect(self, frame, x1, y1, x2, y2, color, alpha=0.6):
         """在 frame 上绘制半透明矩形"""
         overlay = frame.copy()
@@ -637,32 +706,6 @@ class TableTennisScorer:
             final_score = f'Match  {self.total_games_a} : {self.total_games_b}'
             self._put_text_centered(frame, final_score, mid_x, h // 2 + 60, 2.0, COLOR_YELLOW, 4)
 
-        # ── 举手手势进度/冷却反馈 ──
-        HOLD_DURATION = 1.0   # 需要举手多久
-        COOLDOWN_TOTAL = 3.0  # 冷却总时长
-        ring_r = 28
-        for player, gesture, cx in [('A', self.left_gesture, mid_x // 2),
-                                      ('B', self.right_gesture, mid_x + mid_x // 2)]:
-            ring_y = panel_h + 90
-            if now < gesture.cooldown_until:
-                # 冷却中：画红色倒计时弧
-                cd_remain = gesture.cooldown_until - now
-                ratio = cd_remain / COOLDOWN_TOTAL
-                angle = int(360 * ratio)
-                cv2.circle(frame, (cx, ring_y), ring_r, (60, 60, 60), 4)
-                cv2.ellipse(frame, (cx, ring_y), (ring_r, ring_r), -90, 0, angle, (0, 60, 220), 4)
-                self._put_text_centered(frame, f'CD {cd_remain:.1f}s', cx, ring_y + ring_r + 18, 0.55, (0, 80, 255), 2)
-            elif gesture.is_holding_high:
-                # 举手计时中：画绿色进度弧
-                held = now - gesture.start_hold_time
-                ratio = min(held / HOLD_DURATION, 1.0)
-                angle = int(360 * ratio)
-                cv2.circle(frame, (cx, ring_y), ring_r, (50, 50, 50), 4)
-                cv2.ellipse(frame, (cx, ring_y), (ring_r, ring_r), -90, 0, angle, (0, 220, 80), 5)
-                label = '+1' if ratio >= 1.0 else 'Hold'
-                color = (0, 255, 100) if ratio >= 1.0 else COLOR_WHITE
-                self._put_text_centered(frame, label, cx, ring_y, 0.7, color, 2)
-
         return frame
     
     def reset_game(self):
@@ -705,16 +748,14 @@ class TableTennisScorer:
         log_msg = f"Manual adjust: Player {player} {action}, Score A:{self.score_a} - B:{self.score_b}"
         print(log_msg)
         
-        # 播报当前比分
+        #播报当前比分
         if self.tts_available:
-            self._speak_async(f"{self.score_a}比{self.score_b}，{self.serve_side}方发球")
+            serve_text = f"{self.serve_side} serve."
+            text = f"Score: A {self.score_a}, B {self.score_b}. {serve_text}"
+            self._speak_async(text)
         
         if LOG_TO_FILE:
             logging.info(log_msg)
-
-        # 胜负判定（键盘加分也需要检查）
-        if delta > 0:
-            self._check_game_over()
     
     def full_reset(self):
         """全局重置（包括总局比分）"""
@@ -730,7 +771,7 @@ class TableTennisScorer:
         self.last_score_change_time = 0
         print("Full reset: all scores cleared")
         if self.tts_available:
-            self._speak_async("比分已全部清零")
+            self._speak_async("Full reset. All scores cleared.")
         if LOG_TO_FILE:
             logging.info("Full reset: all scores cleared")
 
@@ -744,7 +785,7 @@ class TableTennisScorer:
         print("      A/S - Player A +1/-1")
         print("      B/N - Player B +1/-1")
         
-         # 启动语音识别
+        # 启动语音识别
         self.start_listening()
         
         # 打开摄像头

@@ -37,7 +37,6 @@ except ImportError:
     SR_AVAILABLE = False
 
 from config import *
-
 class PlayerGestureState:
     def __init__(self):
         self.is_holding_high = False
@@ -744,8 +743,8 @@ class TableTennisScorer:
         print("      A/S - Player A +1/-1")
         print("      B/N - Player B +1/-1")
         
-         # 启动语音识别
-        self.start_listening()
+        # # 启动语音识别
+        # self.start_listening()
         
         # 打开摄像头
         cap = cv2.VideoCapture(CAMERA_INDEX)

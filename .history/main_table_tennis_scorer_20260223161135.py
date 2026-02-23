@@ -38,6 +38,7 @@ except ImportError:
 
 from config import *
 
+
 class PlayerGestureState:
     def __init__(self):
         self.is_holding_high = False
@@ -111,18 +112,14 @@ class TableTennisScorer:
         self.voice_recognition_available = SR_AVAILABLE
         self.sr_stop_event = threading.Event()
         self.sr_thread = None
-        # 语音识别状态追踪（用于UI进度条）
-        self.voice_state = 'idle'  # 'idle' / 'listening' / 'processing' / 'scored'
-        self.voice_state_time = 0   # 状态开始时间
-        self.voice_scored_player = None  # 最近识别到的得分方
         if self.voice_recognition_available:
             try:
                 self.recognizer = sr.Recognizer()
                 self.recognizer.energy_threshold = VOICE_ENERGY_THRESHOLD
                 self.recognizer.dynamic_energy_threshold = False  # 固定阈值，防止自动调高
-                self.recognizer.pause_threshold = 0.15  # 极短停顿即视为说完（加速）
-                self.recognizer.phrase_threshold = 0.05  # 更敏感（加速）
-                self.recognizer.non_speaking_duration = 0.1  # 缩短非语音段（加速）
+                self.recognizer.pause_threshold = 0.3   # 更短的停顿即视为说完
+                self.recognizer.phrase_threshold = 0.1   # 更敏感
+                self.recognizer.non_speaking_duration = 0.2
                 self.microphone = sr.Microphone()
                 # 环境噪声校准
                 with self.microphone as source:
@@ -159,25 +156,16 @@ class TableTennisScorer:
         """持续监听麦克风，识别到 A/B 立即加分"""
         print("[Voice] Listen loop started")
         while not self.sr_stop_event.is_set():
-            self.voice_state = 'listening'
-            self.voice_state_time = time.time()
             try:
                 with self.microphone as source:
-                    audio = self.recognizer.listen(
-                        source,
-                        timeout=VOICE_LISTEN_TIMEOUT,
-                        phrase_time_limit=VOICE_PHRASE_TIME_LIMIT
-                    )
-                self.voice_state = 'processing'
-                self.voice_state_time = time.time()
+                    audio = self.recognizer.listen(source, timeout=3, phrase_time_limit=VOICE_PHRASE_TIME_LIMIT)
                 print("[Voice] Audio captured, recognizing...")
             except sr.WaitTimeoutError:
-                self.voice_state = 'idle'
+                # 超时没听到声音，正常继续
                 continue
             except Exception as e:
                 print(f"[Voice] Listen error: {e}")
-                self.voice_state = 'idle'
-                time.sleep(0.3)
+                time.sleep(0.5)
                 continue
 
             # 异步识别，避免阻塞监听循环
@@ -186,65 +174,68 @@ class TableTennisScorer:
             recognize_thread.start()
 
     def _recognize_and_score(self, audio):
-        """识别音频并处理得分 —— 中英文并行请求，谁先匹配谁生效"""
-        result_lock = threading.Lock()
-        result = {'scored': None, 'matched_text': ''}
-        done_event = threading.Event()
+        """识别音频并处理得分，使用 show_all 获取所有候选结果"""
+        scored = None
+        matched_text = ""
 
-        def _try_recognize(language, label):
-            """单语言识别子任务"""
+        # ── 中文识别（show_all获取所有候选） ──
+        try:
+            raw_zh = self.recognizer.recognize_google(audio, language="zh-CN", show_all=True)
+            if raw_zh and isinstance(raw_zh, dict):
+                alternatives = raw_zh.get('alternative', [])
+                for alt in alternatives:
+                    t = alt.get('transcript', '').strip()
+                    if t:
+                        print(f"[Voice] zh candidate: '{t}' (conf: {alt.get('confidence', '?')})")
+                        s = self._match_voice_command(t)
+                        if s:
+                            scored = s
+                            matched_text = t
+                            break
+            elif raw_zh and isinstance(raw_zh, str):
+                print(f"[Voice] Google(zh) heard: '{raw_zh}'")
+                scored = self._match_voice_command(raw_zh)
+                if scored:
+                    matched_text = raw_zh
+            else:
+                print("[Voice] Google(zh): no result")
+        except sr.RequestError as e:
+            print(f"[Voice] Google(zh) request error: {e}")
+        except Exception as e:
+            print(f"[Voice] Google(zh) error: {e}")
+
+        # ── 如果中文没匹配到，尝试英文 ──
+        if not scored:
             try:
-                raw = self.recognizer.recognize_google(audio, language=language, show_all=True)
-                if raw and isinstance(raw, dict):
-                    for alt in raw.get('alternative', []):
+                raw_en = self.recognizer.recognize_google(audio, language="en-US", show_all=True)
+                if raw_en and isinstance(raw_en, dict):
+                    alternatives = raw_en.get('alternative', [])
+                    for alt in alternatives:
                         t = alt.get('transcript', '').strip()
                         if t:
-                            print(f"[Voice] {label} candidate: '{t}' (conf: {alt.get('confidence', '?')})")
+                            print(f"[Voice] en candidate: '{t}' (conf: {alt.get('confidence', '?')})")
                             s = self._match_voice_command(t)
                             if s:
-                                with result_lock:
-                                    if result['scored'] is None:
-                                        result['scored'] = s
-                                        result['matched_text'] = t
-                                        done_event.set()
-                                return
-                elif raw and isinstance(raw, str):
-                    print(f"[Voice] {label} heard: '{raw}'")
-                    s = self._match_voice_command(raw)
-                    if s:
-                        with result_lock:
-                            if result['scored'] is None:
-                                result['scored'] = s
-                                result['matched_text'] = raw
-                                done_event.set()
-                        return
+                                scored = s
+                                matched_text = t
+                                break
+                elif raw_en and isinstance(raw_en, str):
+                    print(f"[Voice] Google(en) heard: '{raw_en}'")
+                    scored = self._match_voice_command(raw_en)
+                    if scored:
+                        matched_text = raw_en
                 else:
-                    print(f"[Voice] {label}: no result")
+                    print("[Voice] Google(en): no result")
             except sr.RequestError as e:
-                print(f"[Voice] {label} request error: {e}")
+                print(f"[Voice] Google(en) request error: {e}")
             except Exception as e:
-                print(f"[Voice] {label} error: {e}")
+                print(f"[Voice] Google(en) error: {e}")
 
-        # ── 中英文并行识别 ──
-        th_zh = threading.Thread(target=_try_recognize, args=("zh-CN", "zh"), daemon=True)
-        th_en = threading.Thread(target=_try_recognize, args=("en-US", "en"), daemon=True)
-        th_zh.start()
-        th_en.start()
-
-        # 等待任一线程匹配成功，或全部完成（最多等3秒防卡死）
-        done_event.wait(timeout=3.0)
-        th_zh.join(timeout=0.5)
-        th_en.join(timeout=0.5)
-
-        if result['scored']:
-            print(f">>> Voice command: Player {result['scored']} scores! (heard: '{result['matched_text']}')")
-            self.voice_state = 'scored'
-            self.voice_scored_player = result['scored']
-            self.voice_state_time = time.time()
-            self.process_score('voice', result['scored'])
+        if scored:
+            print(f">>> Voice command: Player {scored} scores! (heard: '{matched_text}')")
+            self.process_score('voice', scored)
         else:
             print("[Voice] No match found")
-            self.voice_state = 'idle'
 
     def _match_voice_command(self, text):
         """从识别文本中匹配得分指令，返回 'A'/'B' 或 None"""
@@ -390,7 +381,78 @@ class TableTennisScorer:
         if self.tts_thread and self.tts_thread.is_alive():
             self.tts_thread.join(timeout=1.0)
 
+    # 移除备用音频播放方法
     
+    def detect_touching_table_pose(self, landmarks):
+        """
+        检测"摸球桌"动作，严格区分接球姿势，防止误判。
+        
+        摸球桌特征：
+          1. 手掌朝下，指尖位于手腕下方（画面中 y 值更大）
+          2. 多根手指伸展（不是握拳/抓球）
+          3. 手整体位于画面下半部分（靠近桌面）
+        
+        接球特征（排除）：
+          - 手指弯曲握拢
+          - 手掌朝上或侧面
+          - 手在画面中上部分
+        """
+        # 获取所有需要的关键点
+        wrist = landmarks[self.mp_hands.HandLandmark.WRIST]
+        index_mcp = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_MCP]
+        middle_mcp = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+        ring_mcp = landmarks[self.mp_hands.HandLandmark.RING_FINGER_MCP]
+        
+        index_tip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
+        index_pip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_PIP]
+        middle_tip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+        middle_pip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+        ring_tip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_TIP]
+        ring_pip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_PIP]
+        pinky_tip = landmarks[self.mp_hands.HandLandmark.PINKY_TIP]
+        pinky_pip = landmarks[self.mp_hands.HandLandmark.PINKY_PIP]
+        
+        # ── 条件1：手掌朝下 ──
+        # 摸桌时手掌朝下，MCP关节群（掌指关节）的y应大于等于手腕y（画面坐标，y越大越靠下）
+        # 即手指方向是从手腕往下延伸
+        palm_center_y = (index_mcp.y + middle_mcp.y + ring_mcp.y) / 3.0
+        palm_facing_down = palm_center_y > wrist.y  # 掌心在手腕下方
+        
+        # ── 条件2：手指伸展（不是握拳/抓球）──
+        # 判断每根手指是否伸展：指尖到MCP的距离 > PIP到MCP的距离
+        # 简化判断：指尖的y应 >= PIP的y（手指向下伸展时指尖更靠下）
+        # 或者指尖到手腕距离 > PIP到手腕距离（手指没有弯曲回来）
+        def finger_extended(tip, pip, mcp):
+            """判断手指是否伸展（未握拳）"""
+            tip_to_mcp = np.sqrt((tip.x - mcp.x)**2 + (tip.y - mcp.y)**2)
+            pip_to_mcp = np.sqrt((pip.x - mcp.x)**2 + (pip.y - mcp.y)**2)
+            return tip_to_mcp > pip_to_mcp * 0.85  # 指尖比PIP更远离掌根
+        
+        extended_count = 0
+        if finger_extended(index_tip, index_pip, index_mcp):
+            extended_count += 1
+        if finger_extended(middle_tip, middle_pip, middle_mcp):
+            extended_count += 1
+        if finger_extended(ring_tip, ring_pip, ring_mcp):
+            extended_count += 1
+        if finger_extended(pinky_tip, pinky_pip, landmarks[self.mp_hands.HandLandmark.PINKY_MCP]):
+            extended_count += 1
+        
+        fingers_open = extended_count >= 3  # 至少3根手指伸展 → 不是握拳/抓球
+        
+        # ── 条件3：手位于画面下半部分（靠近桌面）──
+        hand_y_positions = [lm.y for lm in landmarks]
+        hand_center_y = sum(hand_y_positions) / len(hand_y_positions)
+        hand_near_table = hand_center_y > 0.45  # 手在画面偏下方
+        
+        # ── 条件4：指尖在手腕下方（手确实在向下触摸）──
+        fingertips_below_wrist = (index_tip.y > wrist.y and middle_tip.y > wrist.y)
+        
+        # ── 综合判断 ──
+        is_touching = (palm_facing_down and fingers_open and 
+                       hand_near_table and fingertips_below_wrist)
+        
+        return is_touching
     
     def detect_pose(self, image):
         """检测举手悬停手势，返回(side, is_high)"""
@@ -744,7 +806,7 @@ class TableTennisScorer:
         print("      A/S - Player A +1/-1")
         print("      B/N - Player B +1/-1")
         
-         # 启动语音识别
+        # 启动语音识别
         self.start_listening()
         
         # 打开摄像头

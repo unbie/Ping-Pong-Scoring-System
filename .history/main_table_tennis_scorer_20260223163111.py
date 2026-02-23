@@ -38,6 +38,7 @@ except ImportError:
 
 from config import *
 
+
 class PlayerGestureState:
     def __init__(self):
         self.is_holding_high = False
@@ -390,7 +391,9 @@ class TableTennisScorer:
         if self.tts_thread and self.tts_thread.is_alive():
             self.tts_thread.join(timeout=1.0)
 
+    # 移除备用音频播放方法
     
+   
     
     def detect_pose(self, image):
         """检测举手悬停手势，返回(side, is_high)"""
@@ -744,8 +747,8 @@ class TableTennisScorer:
         print("      A/S - Player A +1/-1")
         print("      B/N - Player B +1/-1")
         
-         # 启动语音识别
-        self.start_listening()
+        # # 启动语音识别
+        # self.start_listening()
         
         # 打开摄像头
         cap = cv2.VideoCapture(CAMERA_INDEX)

@@ -38,6 +38,7 @@ except ImportError:
 
 from config import *
 
+
 class PlayerGestureState:
     def __init__(self):
         self.is_holding_high = False
@@ -390,7 +391,78 @@ class TableTennisScorer:
         if self.tts_thread and self.tts_thread.is_alive():
             self.tts_thread.join(timeout=1.0)
 
+    # 移除备用音频播放方法
     
+    def detect_touching_table_pose(self, landmarks):
+        """
+        检测"摸球桌"动作，严格区分接球姿势，防止误判。
+        
+        摸球桌特征：
+          1. 手掌朝下，指尖位于手腕下方（画面中 y 值更大）
+          2. 多根手指伸展（不是握拳/抓球）
+          3. 手整体位于画面下半部分（靠近桌面）
+        
+        接球特征（排除）：
+          - 手指弯曲握拢
+          - 手掌朝上或侧面
+          - 手在画面中上部分
+        """
+        # 获取所有需要的关键点
+        wrist = landmarks[self.mp_hands.HandLandmark.WRIST]
+        index_mcp = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_MCP]
+        middle_mcp = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+        ring_mcp = landmarks[self.mp_hands.HandLandmark.RING_FINGER_MCP]
+        
+        index_tip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
+        index_pip = landmarks[self.mp_hands.HandLandmark.INDEX_FINGER_PIP]
+        middle_tip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+        middle_pip = landmarks[self.mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+        ring_tip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_TIP]
+        ring_pip = landmarks[self.mp_hands.HandLandmark.RING_FINGER_PIP]
+        pinky_tip = landmarks[self.mp_hands.HandLandmark.PINKY_TIP]
+        pinky_pip = landmarks[self.mp_hands.HandLandmark.PINKY_PIP]
+        
+        # ── 条件1：手掌朝下 ──
+        # 摸桌时手掌朝下，MCP关节群（掌指关节）的y应大于等于手腕y（画面坐标，y越大越靠下）
+        # 即手指方向是从手腕往下延伸
+        palm_center_y = (index_mcp.y + middle_mcp.y + ring_mcp.y) / 3.0
+        palm_facing_down = palm_center_y > wrist.y  # 掌心在手腕下方
+        
+        # ── 条件2：手指伸展（不是握拳/抓球）──
+        # 判断每根手指是否伸展：指尖到MCP的距离 > PIP到MCP的距离
+        # 简化判断：指尖的y应 >= PIP的y（手指向下伸展时指尖更靠下）
+        # 或者指尖到手腕距离 > PIP到手腕距离（手指没有弯曲回来）
+        def finger_extended(tip, pip, mcp):
+            """判断手指是否伸展（未握拳）"""
+            tip_to_mcp = np.sqrt((tip.x - mcp.x)**2 + (tip.y - mcp.y)**2)
+            pip_to_mcp = np.sqrt((pip.x - mcp.x)**2 + (pip.y - mcp.y)**2)
+            return tip_to_mcp > pip_to_mcp * 0.85  # 指尖比PIP更远离掌根
+        
+        extended_count = 0
+        if finger_extended(index_tip, index_pip, index_mcp):
+            extended_count += 1
+        if finger_extended(middle_tip, middle_pip, middle_mcp):
+            extended_count += 1
+        if finger_extended(ring_tip, ring_pip, ring_mcp):
+            extended_count += 1
+        if finger_extended(pinky_tip, pinky_pip, landmarks[self.mp_hands.HandLandmark.PINKY_MCP]):
+            extended_count += 1
+        
+        fingers_open = extended_count >= 3  # 至少3根手指伸展 → 不是握拳/抓球
+        
+        # ── 条件3：手位于画面下半部分（靠近桌面）──
+        hand_y_positions = [lm.y for lm in landmarks]
+        hand_center_y = sum(hand_y_positions) / len(hand_y_positions)
+        hand_near_table = hand_center_y > 0.45  # 手在画面偏下方
+        
+        # ── 条件4：指尖在手腕下方（手确实在向下触摸）──
+        fingertips_below_wrist = (index_tip.y > wrist.y and middle_tip.y > wrist.y)
+        
+        # ── 综合判断 ──
+        is_touching = (palm_facing_down and fingers_open and 
+                       hand_near_table and fingertips_below_wrist)
+        
+        return is_touching
     
     def detect_pose(self, image):
         """检测举手悬停手势，返回(side, is_high)"""
@@ -744,7 +816,7 @@ class TableTennisScorer:
         print("      A/S - Player A +1/-1")
         print("      B/N - Player B +1/-1")
         
-         # 启动语音识别
+        # 启动语音识别
         self.start_listening()
         
         # 打开摄像头
